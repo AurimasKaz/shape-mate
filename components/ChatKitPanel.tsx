@@ -7,7 +7,6 @@ import { ChatKit, useChatKit } from "@openai/chatkit-react";
 import {
   STARTER_PROMPTS,
   PLACEHOLDER_INPUT,
-  GREETING,
   CREATE_SESSION_ENDPOINT,
   WORKFLOW_ID,
   getThemeConfig,
@@ -351,7 +350,9 @@ export function ChatKitPanel({
       ...getThemeConfig(theme),
     },
     startScreen: {
-      greeting: GREETING,
+      // Use an invisible zero-width space so ChatKit doesn't fall back
+      // to its built-in default greeting, but nothing visible is rendered.
+      greeting: "\u200B",
       prompts: STARTER_PROMPTS,
     },
     composer: {
@@ -485,7 +486,7 @@ widgets: {
     <div className="relative flex h-dvh w-full rounded-2xl flex-col overflow-hidden bg-white shadow-sm transition-colors dark:bg-slate-900">
       {isStartScreenActive && !blockingError && !isInitializingSession && (
         <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center">
-          <div className="mb-32">
+          <div className="mb-32 flex flex-col items-center gap-6">
             <Image
               src="/icons/icon-512.png"
               alt="Shape-Mate icon"
@@ -494,6 +495,9 @@ widgets: {
               priority
               className="h-24 w-24 rounded-xl drop-shadow-lg"
             />
+            <p className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+              Let's play!
+            </p>
           </div>
         </div>
       )}
