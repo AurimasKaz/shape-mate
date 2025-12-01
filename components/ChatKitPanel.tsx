@@ -496,7 +496,7 @@ widgets: {
               className="h-24 w-24 rounded-xl drop-shadow-lg"
             />
             <p className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
-              Let's play!
+              Let&apos;s play!
             </p>
           </div>
         </div>
