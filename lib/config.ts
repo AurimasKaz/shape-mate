@@ -9,7 +9,7 @@ export const STARTER_PROMPTS: StartScreenPrompt[] = [];
 
 export const PLACEHOLDER_INPUT = "Describe the objects around you…";
 
-export const GREETING = "Let's play";
+export const GREETING = "ask me anything about your dog";
 
 export const getThemeConfig = (theme: ColorScheme): ThemeOption => ({
   color: {
