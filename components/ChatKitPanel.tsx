@@ -231,6 +231,141 @@ export function ChatKitPanel({
     }
   }, [isWorkflowConfigured, setErrorState]);
 
+  // Hide iOS keyboard accessory bar
+  useEffect(() => {
+    if (!isBrowser || scriptStatus !== "ready") {
+      return;
+    }
+
+    const hideAccessoryBar = () => {
+      try {
+        const chatkitElement = document.querySelector("openai-chatkit");
+        const iframe =
+          chatkitElement instanceof HTMLElement
+            ? chatkitElement.shadowRoot?.querySelector("iframe") ??
+              chatkitElement.querySelector("iframe")
+            : null;
+
+        if (!iframe || !(iframe instanceof HTMLIFrameElement)) {
+          return;
+        }
+
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (!iframeDoc) {
+          // Cross-origin iframe - can't access
+          if (isDev) {
+            console.debug("[ChatKitPanel] Cannot access iframe (cross-origin)");
+          }
+          return;
+        }
+
+        // Inject CSS to try to affect keyboard behavior
+        const styleId = "hide-ios-accessory-bar";
+        if (!iframeDoc.getElementById(styleId)) {
+          const style = iframeDoc.createElement("style");
+          style.id = styleId;
+          style.textContent = `
+            input, textarea {
+              -webkit-appearance: none;
+              -webkit-user-select: text;
+            }
+          `;
+          iframeDoc.head.appendChild(style);
+        }
+
+        // Find all input and textarea elements
+        const inputs = iframeDoc.querySelectorAll("input, textarea");
+        inputs.forEach((input) => {
+          if (input instanceof HTMLElement) {
+            // Use inputmode="search" which sometimes shows a cleaner keyboard
+            // This is the best we can do - iOS always shows an accessory bar
+            input.setAttribute("inputmode", "search");
+            input.setAttribute("autocorrect", "off");
+            input.setAttribute("autocapitalize", "off");
+            input.setAttribute("spellcheck", "false");
+            
+            // Intercept focus events to modify input at the exact moment
+            input.addEventListener("focus", (e) => {
+              const target = e.target as HTMLElement;
+              if (target) {
+                target.setAttribute("inputmode", "search");
+                target.setAttribute("autocorrect", "off");
+                target.setAttribute("autocapitalize", "off");
+              }
+            }, { capture: true });
+            
+            // Also try on touchstart (before focus)
+            input.addEventListener("touchstart", (e) => {
+              const target = e.target as HTMLElement;
+              if (target) {
+                target.setAttribute("inputmode", "search");
+              }
+            }, { capture: true });
+          }
+        });
+      } catch (error) {
+        // Silently fail if we can't access the iframe (cross-origin)
+        if (isDev) {
+          console.debug("[ChatKitPanel] Could not hide iOS accessory bar", error);
+        }
+      }
+    };
+
+    // Try multiple times with delays to catch the input when it's added
+    const tryHide = () => {
+      hideAccessoryBar();
+      setTimeout(hideAccessoryBar, 100);
+      setTimeout(hideAccessoryBar, 500);
+      setTimeout(hideAccessoryBar, 1000);
+      setTimeout(hideAccessoryBar, 2000);
+    };
+
+    tryHide();
+
+    // Also try when the iframe loads
+    const chatkitElement = document.querySelector("openai-chatkit");
+    const iframe =
+      chatkitElement instanceof HTMLElement
+        ? chatkitElement.shadowRoot?.querySelector("iframe") ??
+          chatkitElement.querySelector("iframe")
+        : null;
+
+    if (iframe) {
+      iframe.addEventListener("load", tryHide);
+      
+      // Set up MutationObserver to watch for input elements being added
+      const setupObserver = () => {
+        try {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (!iframeDoc) return;
+
+          const observer = new MutationObserver(() => {
+            hideAccessoryBar();
+          });
+
+          if (iframeDoc.body) {
+            observer.observe(iframeDoc.body, {
+              childList: true,
+              subtree: true,
+            });
+          }
+        } catch (error) {
+          if (isDev) {
+            console.debug("[ChatKitPanel] Could not set up MutationObserver", error);
+          }
+        }
+      };
+
+      iframe.addEventListener("load", () => {
+        setTimeout(setupObserver, 500);
+      });
+
+      return () => {
+        iframe.removeEventListener("load", tryHide);
+      };
+    }
+  }, [scriptStatus, widgetInstanceKey]);
+
   const handleResetChat = useCallback(() => {
     processedFacts.current.clear();
     if (isBrowser) {
