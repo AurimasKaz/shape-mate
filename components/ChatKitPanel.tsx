@@ -7,6 +7,7 @@ import { ChatKit, useChatKit } from "@openai/chatkit-react";
 import {
   STARTER_PROMPTS,
   PLACEHOLDER_INPUT,
+  PLACEHOLDER_AFTER_REPLY,
   CREATE_SESSION_ENDPOINT,
   WORKFLOW_ID,
   getThemeConfig,
@@ -141,6 +142,10 @@ export function ChatKitPanel({
       : "pending"
   );
   const [widgetInstanceKey, setWidgetInstanceKey] = useState(0);
+  const [composerPlaceholder, setComposerPlaceholder] = useState(
+    PLACEHOLDER_INPUT
+  );
+  const hasUpdatedPlaceholderRef = useRef(false);
   const [isStartScreenActive, setIsStartScreenActive] = useState(true);
 
   const setErrorState = useCallback((updates: Partial<ErrorState>) => {
@@ -237,6 +242,8 @@ export function ChatKitPanel({
     setErrors(createInitialErrors());
     setWidgetInstanceKey((prev) => prev + 1);
     setIsStartScreenActive(true);
+    hasUpdatedPlaceholderRef.current = false;
+    setComposerPlaceholder(PLACEHOLDER_INPUT);
   }, []);
 
   const getClientSecret = useCallback(
@@ -356,7 +363,7 @@ export function ChatKitPanel({
       prompts: STARTER_PROMPTS,
     },
     composer: {
-      placeholder: PLACEHOLDER_INPUT,
+      placeholder: composerPlaceholder,
       attachments: {
         // Enable attachments
         enabled: true,
@@ -457,10 +464,18 @@ widgets: {
     },
     onResponseStart: () => {
       setErrorState({ integration: null, retryable: false });
+      if (!hasUpdatedPlaceholderRef.current) {
+        hasUpdatedPlaceholderRef.current = true;
+        setComposerPlaceholder(PLACEHOLDER_AFTER_REPLY);
+      }
     },
     onThreadChange: ({ threadId }: { threadId: string | null }) => {
       processedFacts.current.clear();
       setIsStartScreenActive(threadId === null);
+      if (threadId === null) {
+        hasUpdatedPlaceholderRef.current = false;
+        setComposerPlaceholder(PLACEHOLDER_INPUT);
+      }
     },
     onError: ({ error }: { error: unknown }) => {
       // Note that Chatkit UI handles errors for your users.
@@ -486,7 +501,7 @@ widgets: {
     <div className="relative flex h-dvh w-full rounded-2xl flex-col overflow-hidden bg-white shadow-sm transition-colors dark:bg-slate-900">
       {isStartScreenActive && !blockingError && !isInitializingSession && (
         <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center">
-          <div className="mb-32 flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-2">
             <Image
               src="/icons/icon-512.png"
               alt="Shape-Mate icon"
@@ -495,8 +510,11 @@ widgets: {
               priority
               className="h-24 w-24 rounded-xl drop-shadow-lg"
             />
-            <p className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+            <p className="text-2xl font-semibold text-slate-900 dark:text-slate-50 mt-4">
               Let&apos;s play!
+            </p>
+            <p className="text-l font-regular text-slate-600 dark:text-slate-50">
+              Describe the objects around you
             </p>
           </div>
         </div>

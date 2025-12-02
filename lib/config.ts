@@ -7,7 +7,8 @@ export const CREATE_SESSION_ENDPOINT = "/api/create-session";
 
 export const STARTER_PROMPTS: StartScreenPrompt[] = [];
 
-export const PLACEHOLDER_INPUT = "Describe the objects around you…";
+export const PLACEHOLDER_INPUT = "Bowl, rope toy, chair…";
+export const PLACEHOLDER_AFTER_REPLY = "Reply";
 
 export const GREETING = "ask me anything about your dog";
 
