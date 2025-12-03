@@ -504,7 +504,7 @@ widgets: {
           <div className="flex flex-col items-center gap-2">
             <Image
               src="/icons/icon-512.png"
-              alt="Shape-Mate icon"
+              alt="Prance Day icon"
               width={128}
               height={128}
               priority

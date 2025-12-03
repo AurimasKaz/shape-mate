@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Shape-Mate",
+  title: "Prance Day",
   description: "Dog shaping trainer",
   manifest: "/manifest.json",
   themeColor: "#0d1117",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
   appleWebApp: {
     capable: true,
-    title: "Shape-Mate",
+    title: "Prance Day",
     statusBarStyle: "black-translucent",
   }
 };
