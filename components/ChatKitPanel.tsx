@@ -55,6 +55,7 @@ const createInitialErrors = (): ErrorState => ({
   retryable: false,
 });
 
+/*
 const EXERCISES = [
   {
     exerciseId: 'towel-tug-to-target',
@@ -95,6 +96,14 @@ const EXERCISES = [
   }
 ];
 
+
+const EXERCISES = [
+  {
+    exerciseId: 'towel-tug-to-target',
+    exerciseTitle: 'Towel Tug to Target',
+    exerciseSummary: 'The dog bites the towel\'s edge and drags it across the floor toward a designated spot.',
+    instructions: [
+      'Lay a towel flat on the floor',
 function getExerciseInstructions(exerciseId: string) {
   const exercise = EXERCISES.find(e => e.exerciseId === exerciseId);
   
@@ -123,6 +132,10 @@ function getRandomExercise() {
     exerciseSummary: random.exerciseSummary
   };
 }
+
+*/
+
+
 
 export function ChatKitPanel({
   theme,
@@ -442,6 +455,9 @@ widgets: {
         return { success: true };
       }
 
+
+      /*
+
       if (invocation.name === "get_exercise_details") {
         const exerciseId = String(invocation.params.exerciseId ?? "");
         if (isDev) {
@@ -456,6 +472,7 @@ widgets: {
         }
         return getRandomExercise();
       }
+      */
 
       return { success: false };
     },
