@@ -342,7 +342,7 @@ widgets: {
 },
 
 
-    
+  
 
     
     onClientTool: async (invocation: {
